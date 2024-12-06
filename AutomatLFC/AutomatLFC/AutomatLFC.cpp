@@ -5,6 +5,7 @@
 #include <string>
 #include <stdexcept>
 #include <iomanip>
+#include <fstream>
 #include "DeterministicFiniteAutomaton.h"
 
 int main() {
@@ -30,11 +31,17 @@ int main() {
 
     dfa.print();
 
-    std::vector<std::string> words = { "aab", "abb", "aabb", "bba" };
+    std::vector<std::string> words = { "aab", "abb", "aabb", "bba","aaaaaaaaaaaaaaaaaaaaaaab"};
     for (const auto& word : words) {
         std::cout << "cuvantul \"" << word << "\" este "
             << (dfa.checkWord(word) ? "acceptat" : "respins") << "\n";
     }
 
+    std::cout << "/////////////////////\n pasul 2";
+    std::ifstream f("input.txt");
+    std::string regex;
+    f >> regex;
+    std::cout << regex;
+    
     return 0;
 }
