@@ -1,47 +1,56 @@
-#include <iostream>
-#include <unordered_map>
+﻿#include <iostream>
 #include <unordered_set>
-#include <vector>
-#include <string>
-#include <stdexcept>
-#include <iomanip>
-#include <fstream>
+#include <unordered_map>
+#include <map>
 #include "DeterministicFiniteAutomaton.h"
+#include "state.h"
 
 int main() {
-    std::unordered_set<std::string> states = { "q0", "q1", "q2" };
-    std::unordered_set<char> input_alphabet = { 'a', 'b' };
-    std::unordered_map<std::string, std::unordered_map<char, std::string>> state_transitions = {
-        {"q0", {{'a', "q1"}, {'b', "q0"}}},
-        {"q1", {{'a', "q1"}, {'b', "q2"}}},
-        {"q2", {{'a', "q2"}, {'b', "q2"}}}
-    };
-    std::string start_state = "q0";
-    std::unordered_set<std::string> accepting_states = { "q2" };
+    State q0(0), q1(1), q2(2);  // Considerăm că State are un constructor ce primește un int (ID-ul stării)
 
+    // Setul de stări
+    std::unordered_set<State, State::Hash> states = { q0, q1, q2 };
+
+    // Alfabetul de intrare
+    std::unordered_set<char> input_alphabet = { 'a', 'b' };
+
+    // Transițiile automatei
+    std::map<StateSymbolPair, State> state_transitions = {
+        {StateSymbolPair{q0, 'a'}, q1},
+        {StateSymbolPair{q0, 'b'}, q0},
+        {StateSymbolPair{q1, 'a'}, q1},
+        {StateSymbolPair{q1, 'b'}, q2},
+        {StateSymbolPair{q2, 'a'}, q2},
+        {StateSymbolPair{q2, 'b'}, q2}
+    };
+
+    // Starea de start
+    State start_state(0);
+
+    // Stările de acceptare
+    std::unordered_set<State, State::Hash> accepting_states = { q2 };
+
+    // Crearea automatului determinist
     DeterministicFiniteAutomaton dfa(states, input_alphabet, state_transitions, start_state, accepting_states);
 
+    // Verificarea dacă automata este validă
     if (dfa.verify()) {
-        std::cout << "automatul este valid\n";
+        std::cout << "Automatul este valid.\n";
     }
     else {
-        std::cout << "automatul nu este valid\n";
+        std::cout << "Automatul nu este valid.\n";
         return 1;
     }
 
+    // Afișarea detaliilor despre automat
     dfa.print();
 
-    std::vector<std::string> words = { "aab", "abb", "aabb", "bba","aaaaaaaaaaaaaaaaaaaaaaab"};
+    // Verificarea unor cuvinte
+    std::vector<std::string> words = { "aab", "abb", "aabb", "bba", "aaaaaaaaaaaaaaaaaaaaaaab" };
     for (const auto& word : words) {
-        std::cout << "cuvantul \"" << word << "\" este "
+        std::cout << "Cuvântul \"" << word << "\" este "
             << (dfa.checkWord(word) ? "acceptat" : "respins") << "\n";
     }
 
-    std::cout << "/////////////////////\n pasul 2";
-    std::ifstream f("input.txt");
-    std::string regex;
-    f >> regex;
-    std::cout << regex;
-    
     return 0;
 }

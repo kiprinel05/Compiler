@@ -130,9 +130,13 @@
   <ItemGroup>
     <ClCompile Include="AutomatLFC.cpp" />
     <ClCompile Include="DeterministicFiniteAutomaton.cpp" />
+    <ClCompile Include="LamdbaNFA.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeterministicFiniteAutomaton.h" />
+    <ClInclude Include="help.h" />
+    <ClInclude Include="LambdaNFA.h" />
+    <ClInclude Include="state.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />
