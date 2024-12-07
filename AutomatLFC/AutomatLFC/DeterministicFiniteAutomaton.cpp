@@ -45,7 +45,7 @@ void DeterministicFiniteAutomaton::print() const
     std::cout << "\n";
 }
 bool DeterministicFiniteAutomaton::checkWord(const std::string& word) const {
-    State currentState = m_startState;  // Începem de la starea de start
+    State currentState = m_startState;  
 
     for (char symbol : word) {
         auto it = m_transition.find(StateSymbolPair{ currentState, symbol });
@@ -61,34 +61,27 @@ bool DeterministicFiniteAutomaton::checkWord(const std::string& word) const {
 
 bool DeterministicFiniteAutomaton::verify() const {
     for (const auto& [stateSymbol, state] : m_transition) {
-        // Verificăm dacă starea există în setul de stări
         if (m_states.find(stateSymbol.state) == m_states.end()) {
             return false;
         }
-
-        // Verificăm dacă simbolul există în alfabet
         if (m_alphabet.find(stateSymbol.symbol) == m_alphabet.end()) {
             return false;
         }
 
-        // Verificăm dacă starea țintă există în setul de stări
         if (m_states.find(state) == m_states.end()) {
             return false;
         }
     }
 
-    // Verificăm dacă starea de start este validă
     if (m_states.find(m_startState) == m_states.end()) {
         return false;
     }
 
-    // Verificăm dacă toate stările finale sunt valide
     for (const State& finalState : m_finalStates) {
         if (m_states.find(finalState) == m_states.end()) {
             return false;
         }
     }
 
-    // Dacă toate verificările au trecut, automatul este valid
     return true;
 }
