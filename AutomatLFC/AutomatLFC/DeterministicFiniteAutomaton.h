@@ -17,7 +17,7 @@ public:
         const std::unordered_set<State, State::Hash>& finalStates);
 
     void createFromRegex(std::string_view regex);
-    void print() const;
+    void print(std::ostream& os) const;
 
     bool checkWord(const std::string& word) const;
     bool verify() const;

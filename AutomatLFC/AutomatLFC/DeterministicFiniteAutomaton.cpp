@@ -26,24 +26,25 @@ void DeterministicFiniteAutomaton::createFromRegex(std::string_view regex)
     *this = lambdaAutomaton.toDFA();
 }
 
-void DeterministicFiniteAutomaton::print() const
+void DeterministicFiniteAutomaton::print(std::ostream& os) const
 {
-    std::cout << "\n- DFA -\nRESULTING TRANSITIONS:\n\n";
+    os << "\n- DFA -\nRESULTING TRANSITIONS:\n\n";
     for (const auto& [stateSymbol, state] : m_transition)
     {
         bool isSourceFinal = m_finalStates.contains(stateSymbol.state);
         bool isTargetFinal = m_finalStates.contains(state);
 
-        std::cout << "(q" << stateSymbol.state.id;
-        if (isSourceFinal) std::cout << "*";
+        os << "(q" << stateSymbol.state.id;
+        if (isSourceFinal) os << "*";
 
-        std::cout << ", " << stateSymbol.symbol << "): q" << state.id;
-        if (isTargetFinal) std::cout << "*";
+        os << ", " << stateSymbol.symbol << "): q" << state.id;
+        if (isTargetFinal) os << "*";
 
-        std::cout << "\n";
+        os << "\n";
     }
-    std::cout << "\n";
+    os << "\n";
 }
+
 bool DeterministicFiniteAutomaton::checkWord(const std::string& word) const {
     State currentState = m_startState;  
 
