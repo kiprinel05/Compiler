@@ -5,14 +5,14 @@
 #include <iostream>
 #include <stdexcept>
 
-LambdaNFA::LambdaNFA()
+NFA::NFA()
     : m_transition{}, m_stateCounter{ 0 }, m_startState{ -1, '\0' }, m_finalState{ -1, '\0' }, m_alphabet{}
 {
 }
 
-void LambdaNFA::constructFromRegex(std::string_view regex) // assume it's in postfix form
+void NFA::constFromRegex(std::string_view regex)
 {
-    std::stack<LambdaNFA> automatons;
+    std::stack<NFA> automatons;
 
     for (char symbol : regex)
     {
@@ -26,8 +26,8 @@ void LambdaNFA::constructFromRegex(std::string_view regex) // assume it's in pos
             State startState = { m_stateCounter++ };
             State endState = { m_stateCounter++ };
 
-            LambdaNFA charNFA{
-                constructCharNFA(
+            NFA charNFA{
+                constructNFA(
                 startState,
                 endState,
                 symbol)
@@ -38,139 +38,139 @@ void LambdaNFA::constructFromRegex(std::string_view regex) // assume it's in pos
 
         if (symbol == '*')
         {
-            LambdaNFA automaton{ automatons.top() };
+            NFA automaton{ automatons.top() };
             automatons.pop();
 
             automatons.push(kleeneStarNFA(automaton));
             continue;
         }
 
-        LambdaNFA second{ automatons.top() };
+        NFA second{ automatons.top() };
         automatons.pop();
-        LambdaNFA first{ automatons.top() };
+        NFA first{ automatons.top() };
         automatons.pop();
         if (symbol == '.')
         {
-            LambdaNFA mergedNFA{ mergeNFA(first, second) };
+            NFA mergedNFA{ mergeNFA(first, second) };
             automatons.push(mergedNFA);
         }
         else if (symbol == '|')
         {
-            LambdaNFA alternatedNFA{ alternateNFA(first, second) };
+            NFA alternatedNFA{ alternateNFA(first, second) };
             automatons.push(alternatedNFA);
         }
     }
 
-    LambdaNFA result = automatons.top();
+    NFA result = automatons.top();
     result.m_alphabet = m_alphabet;
     automatons.pop();
 
     *this = result;
     std::cout << "startState: " << this->m_startState.state.id << "\n";
-    std::cout << "finalState: " << this->m_finalState.state.id << "\n";
+    std::cout << "finalState: " << this->m_finalState.state.id << "\n\n";
 
-    auto lambdaClosure = getLambdaClosure(std::unordered_set<State, State::Hash>{State{ 19 }});
-    std::cout << "Lambda closure of q19: ";
+    auto lambdaClosure = getLambdaCls(std::unordered_set<State, State::Hash>{State{ 19 }});
+    std::cout << "Lambda closure q19: ";
     for (State state : lambdaClosure)
     {
         std::cout << state.id << " ";
     }
     std::cout << "\n";
 
-    lambdaClosure = getLambdaClosure(std::unordered_set<State, State::Hash>{State{ 24 }});
-    std::cout << "Lambda closure of q24: ";
+    lambdaClosure = getLambdaCls(std::unordered_set<State, State::Hash>{State{ 24 }});
+    std::cout << "Lambda closure q24: ";
     for (State state : lambdaClosure)
     {
         std::cout << state.id << " ";
     }
     std::cout << "\n";
 
-    lambdaClosure = getLambdaClosure(std::unordered_set<State, State::Hash>{State{ 1 }});
-    std::cout << "Lambda closure of q1: ";
+    lambdaClosure = getLambdaCls(std::unordered_set<State, State::Hash>{State{ 1 }});
+    std::cout << "Lambda closure q1: ";
     for (State state : lambdaClosure)
     {
         std::cout << state.id << " ";
     }
-    std::cout << "\n";
+    std::cout << "\n\n";
 }
 
-DeterministicFiniteAutomaton LambdaNFA::convertToDFA() const
+DeterministicFiniteAutomaton NFA::toDFA() const
 {
     std::unordered_set<State, State::Hash> states;
     std::unordered_set<char> alphabet{ m_alphabet };
-    std::map<StateSymbolPair, State> resultingTransitions;
+    std::map<StateSymbolPair, State> rezTrans;
     State startState;
     std::unordered_set<State, State::Hash> finalStates;
 
-    std::vector<std::unordered_set<State, State::Hash>> resultingStates;
-    std::queue<std::unordered_set<State, State::Hash>> closuresToCheck;
-    std::unordered_set<State, State::Hash> startClosure = getLambdaClosure({ m_startState.state });
-    closuresToCheck.push(startClosure);
-    resultingStates.push_back(closuresToCheck.front());
+    std::vector<std::unordered_set<State, State::Hash>> rezStates;
+    std::queue<std::unordered_set<State, State::Hash>> closToCheck;
+    std::unordered_set<State, State::Hash> startClosure = getLambdaCls({ m_startState.state });
+    closToCheck.push(startClosure);
+    rezStates.push_back(closToCheck.front());
 
     if (startClosure.contains(m_finalState.state))
     {
         finalStates.insert(State{ 0 });
     }
 
-    while (!closuresToCheck.empty())
+    while (!closToCheck.empty())
     {
-        std::unordered_set<State, State::Hash> currentClosure = closuresToCheck.front();
-        closuresToCheck.pop();
+        std::unordered_set<State, State::Hash> currentClos = closToCheck.front();
+        closToCheck.pop();
 
         for (char symbol : m_alphabet)
         {
-            std::unordered_set<State, State::Hash> currentTransitions;
-            for (State state : currentClosure)
+            std::unordered_set<State, State::Hash> currentTrans;
+            for (State state : currentClos)
             {
                 if (m_transition.contains({ state, symbol }))
                 {
-                    currentTransitions.insert(
+                    currentTrans.insert(
                         m_transition.at({ state, symbol }).begin(),
                         m_transition.at({ state, symbol }).end()
                     );
                 }
             }
 
-            std::unordered_set<State, State::Hash> nextClosure = getLambdaClosure(currentTransitions);
+            std::unordered_set<State, State::Hash> nextClos = getLambdaCls(currentTrans);
 
-            if (nextClosure.empty()) continue;
+            if (nextClos.empty()) continue;
 
-            int currentStateID = std::distance(resultingStates.begin(),
-                std::find(resultingStates.begin(), resultingStates.end(), currentClosure));
+            int currentStID = std::distance(rezStates.begin(),
+                std::find(rezStates.begin(), rezStates.end(), currentClos));
 
-            int targetStateID;
-            auto it = std::find(resultingStates.begin(), resultingStates.end(), nextClosure);
-            if (it == resultingStates.end())
+            int targetStID;
+            auto it = std::find(rezStates.begin(), rezStates.end(), nextClos);
+            if (it == rezStates.end())
             {
-                targetStateID = resultingStates.size();
-                resultingStates.push_back(nextClosure);
-                closuresToCheck.push(nextClosure);
+                targetStID = rezStates.size();
+                rezStates.push_back(nextClos);
+                closToCheck.push(nextClos);
 
-                if (nextClosure.contains(m_finalState.state))
+                if (nextClos.contains(m_finalState.state))
                 {
-                    finalStates.insert(State{ targetStateID });
+                    finalStates.insert(State{ targetStID });
                 }
             }
             else
             {
-                targetStateID = std::distance(resultingStates.begin(), it);
+                targetStID = std::distance(rezStates.begin(), it);
             }
 
-            resultingTransitions[{State{ currentStateID }, symbol}] = { State{ targetStateID } };
+            rezTrans[{State{ currentStID }, symbol}] = { State{ targetStID } };
         }
     }
 
-    for (int resultingStateID = 0; resultingStateID < resultingStates.size(); ++resultingStateID)
+    for (int resStID = 0; resStID < rezStates.size(); ++resStID)
     {
-        states.insert(State{ resultingStateID });
+        states.insert(State{ resStID });
     }
 
     startState = State{ 0 };
 
-    std::cout << "LAMBDANFA: RESULTING STATES\n";
+    std::cout << "\n- LAMBDA NFA -\n RESULTING STATES\n";
     int stateID = 0;
-    for (const auto& resState : resultingStates)
+    for (const auto& resState : rezStates)
     {
         std::cout << "q" << stateID++ << ": ";
         for (const auto& state : resState)
@@ -180,19 +180,19 @@ DeterministicFiniteAutomaton LambdaNFA::convertToDFA() const
         std::cout << "\n";
     }
 
-    return DeterministicFiniteAutomaton{ states, alphabet, resultingTransitions, startState, finalStates };
+    return DeterministicFiniteAutomaton{ states, alphabet, rezTrans, startState, finalStates };
 }
 
-std::unordered_set<State, State::Hash> LambdaNFA::getLambdaClosure(const std::unordered_set<State, State::Hash>& states) const
+std::unordered_set<State, State::Hash> NFA::getLambdaCls(const std::unordered_set<State, State::Hash>& states) const
 {
     std::unordered_set<State, State::Hash> lambdaClosure;
     std::stack<State> toCheck;
     for (State state : states)
     {
         toCheck.push(state);
-        if (m_equivalentStates.contains(state))
+        if (m_eqStates.contains(state))
         {
-            toCheck.push(m_equivalentStates.at(state));
+            toCheck.push(m_eqStates.at(state));
         }
     }
 
@@ -222,11 +222,11 @@ std::unordered_set<State, State::Hash> LambdaNFA::getLambdaClosure(const std::un
     return lambdaClosure;
 }
 
-void LambdaNFA::print() const
+void NFA::print() const
 {
     for (const auto& [stateSymbol, states] : m_transition)
     {
-        std::cout << "transition(q" << stateSymbol.state.id << ", " << stateSymbol.symbol << "): ";
+        std::cout << "(q" << stateSymbol.state.id << ", " << stateSymbol.symbol << "): ";
         for (const auto& state : states)
         {
             std::cout << "q" << state.id << " ";
@@ -236,9 +236,9 @@ void LambdaNFA::print() const
     std::cout << "\n";
 }
 
-LambdaNFA LambdaNFA::constructCharNFA(State startSate, State finalState, char symbol)
+NFA NFA::constructNFA(State startSate, State finalState, char symbol)
 {
-    LambdaNFA result;
+    NFA result;
     result.m_transition[{startSate, symbol}].insert(finalState);
 
     result.m_startState = { startSate, symbol };
@@ -247,11 +247,11 @@ LambdaNFA LambdaNFA::constructCharNFA(State startSate, State finalState, char sy
     return result;
 }
 
-LambdaNFA LambdaNFA::mergeNFA(const LambdaNFA& first, const LambdaNFA& second)
+NFA NFA::mergeNFA(const NFA& first, const NFA& second)
 {
-    LambdaNFA result{ first };
-    result.m_equivalentStates.insert(first.m_equivalentStates.begin(), first.m_equivalentStates.end());
-    result.m_equivalentStates.insert(second.m_equivalentStates.begin(), second.m_equivalentStates.end());
+    NFA result{ first };
+    result.m_eqStates.insert(first.m_eqStates.begin(), first.m_eqStates.end());
+    result.m_eqStates.insert(second.m_eqStates.begin(), second.m_eqStates.end());
 
     result.m_transition[{result.m_finalState.state, second.m_startState.symbol}] = second.m_transition.at(second.m_startState);
 
@@ -271,17 +271,17 @@ LambdaNFA LambdaNFA::mergeNFA(const LambdaNFA& first, const LambdaNFA& second)
     result.m_startState = first.m_startState;
     result.m_finalState = second.m_finalState;
 
-    result.m_equivalentStates[first.m_finalState.state] = second.m_startState.state;
-    result.m_equivalentStates[second.m_startState.state] = first.m_finalState.state;
+    result.m_eqStates[first.m_finalState.state] = second.m_startState.state;
+    result.m_eqStates[second.m_startState.state] = first.m_finalState.state;
 
     return result;
 }
 
-LambdaNFA LambdaNFA::alternateNFA(const LambdaNFA& first, const LambdaNFA& second)
+NFA NFA::alternateNFA(const NFA& first, const NFA& second)
 {
-    LambdaNFA result;
-    result.m_equivalentStates.insert(first.m_equivalentStates.begin(), first.m_equivalentStates.end());
-    result.m_equivalentStates.insert(second.m_equivalentStates.begin(), second.m_equivalentStates.end());
+    NFA result;
+    result.m_eqStates.insert(first.m_eqStates.begin(), first.m_eqStates.end());
+    result.m_eqStates.insert(second.m_eqStates.begin(), second.m_eqStates.end());
 
     result.m_startState = { m_stateCounter++, lambda };
     result.m_finalState = { m_stateCounter++, lambda };
@@ -305,12 +305,12 @@ LambdaNFA LambdaNFA::alternateNFA(const LambdaNFA& first, const LambdaNFA& secon
     return result;
 }
 
-LambdaNFA LambdaNFA::kleeneStarNFA(const LambdaNFA& automaton)
+NFA NFA::kleeneStarNFA(const NFA& automaton)
 {
-    LambdaNFA result;
-    result.m_equivalentStates.insert(automaton.m_equivalentStates.begin(), automaton.m_equivalentStates.end());
+    NFA result;
+    result.m_eqStates.insert(automaton.m_eqStates.begin(), automaton.m_eqStates.end());
 
-    result.m_equivalentStates = automaton.m_equivalentStates;
+    result.m_eqStates = automaton.m_eqStates;
     result.m_startState = { m_stateCounter++, lambda };
     result.m_finalState = { m_stateCounter++, lambda };
 
@@ -327,7 +327,7 @@ LambdaNFA LambdaNFA::kleeneStarNFA(const LambdaNFA& automaton)
     return result;
 }
 
-bool LambdaNFA::isOperator(char symbol)
+bool NFA::isOperator(char symbol)
 {
     std::string operators = "|.*";
     return operators.find(symbol) != std::string::npos;

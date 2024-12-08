@@ -19,22 +19,22 @@ DeterministicFiniteAutomaton::DeterministicFiniteAutomaton(const std::unordered_
 
 void DeterministicFiniteAutomaton::createFromRegex(std::string_view regex)
 {
-    LambdaNFA lambdaAutomaton{};
-    lambdaAutomaton.constructFromRegex(regex);
+    NFA lambdaAutomaton{};
+    lambdaAutomaton.constFromRegex(regex);
     lambdaAutomaton.print();
 
-    *this = lambdaAutomaton.convertToDFA();
+    *this = lambdaAutomaton.toDFA();
 }
 
 void DeterministicFiniteAutomaton::print() const
 {
-    std::cout << "DFA: RESULTING TRANSITIONS:\n";
+    std::cout << "\n- DFA -\nRESULTING TRANSITIONS:\n\n";
     for (const auto& [stateSymbol, state] : m_transition)
     {
         bool isSourceFinal = m_finalStates.contains(stateSymbol.state);
         bool isTargetFinal = m_finalStates.contains(state);
 
-        std::cout << "transition(q" << stateSymbol.state.id;
+        std::cout << "(q" << stateSymbol.state.id;
         if (isSourceFinal) std::cout << "*";
 
         std::cout << ", " << stateSymbol.symbol << "): q" << state.id;

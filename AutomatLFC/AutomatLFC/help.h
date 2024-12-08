@@ -24,13 +24,13 @@ int operatorPriority(char c)
         return 0;
     }
 
-    throw std::runtime_error("Not an operator");
+    throw std::runtime_error("[ not an operator ]");
 }
 
-std::string polishPostfixForm(std::string_view regex)
+std::string polishPostfix(std::string_view regex)
 {
     std::string result{};
-    std::stack<char> opStack;
+    std::stack<char> oprtr;
 
     for (char c : regex)
     {
@@ -42,40 +42,40 @@ std::string polishPostfixForm(std::string_view regex)
         {
             if (c == '(')
             {
-                opStack.push(c);
+                oprtr.push(c);
             }
             else if (c == ')')
             {
-                while (!opStack.empty() && opStack.top() != '(')
+                while (!oprtr.empty() && oprtr.top() != '(')
                 {
-                    result.push_back(opStack.top());
-                    opStack.pop();
+                    result.push_back(oprtr.top());
+                    oprtr.pop();
                 }
 
-                if (opStack.empty())
+                if (oprtr.empty())
                 {
-                    throw std::runtime_error("Invalid regex: unmatched ')'");
+                    throw std::runtime_error("[ invalid regex // unmatched ')' ]");
                 }
 
-                opStack.pop();
+                oprtr.pop();
             }
             else
             {
-                while (!opStack.empty() && operatorPriority(opStack.top()) >= operatorPriority(c))
+                while (!oprtr.empty() && operatorPriority(oprtr.top()) >= operatorPriority(c))
                 {
-                    result.push_back(opStack.top());
-                    opStack.pop();
+                    result.push_back(oprtr.top());
+                    oprtr.pop();
                 }
 
-                opStack.push(c);
+                oprtr.push(c);
             }
         }
     }
 
-    while (!opStack.empty())
+    while (!oprtr.empty())
     {
-        result.push_back(opStack.top());
-        opStack.pop();
+        result.push_back(oprtr.top());
+        oprtr.pop();
     }
 
     return result;

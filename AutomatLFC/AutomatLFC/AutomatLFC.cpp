@@ -11,9 +11,9 @@
 //    State q0(0), q1(1), q2(2);  
 //    std::unordered_set<State, State::Hash> states = { q0, q1, q2 };
 //
-//    std::unordered_set<char> input_alphabet = { 'a', 'b' };
+//    std::unordered_set<char> inputAlph = { 'a', 'b' };
 //
-//    std::map<StateSymbolPair, State> state_transitions = {
+//    std::map<StateSymbolPair, State> stateTrans = {
 //        {StateSymbolPair{q0, 'a'}, q1},
 //        {StateSymbolPair{q0, 'b'}, q0},
 //        {StateSymbolPair{q1, 'a'}, q1},
@@ -23,14 +23,14 @@
 //    };
 //
 //    State start_state(0);
-//    std::unordered_set<State, State::Hash> accepting_states = { q2 };
-//    DeterministicFiniteAutomaton dfa(states, input_alphabet, state_transitions, start_state, accepting_states);
+//    std::unordered_set<State, State::Hash> accStates = { q2 };
+//    DeterministicFiniteAutomaton dfa(states, inputAlph, stateTrans, start_state, accStates);
 //
 //    if (dfa.verify()) {
-//        std::cout << "Automatul este valid.\n";
+//        std::cout << "[ automatul este valid ]\n";
 //    }
 //    else {
-//        std::cout << "Automatul nu este valid.\n";
+//        std::cout << "[ automatul nu este valid ]\n";
 //        return 1;
 //    }
 //
@@ -38,7 +38,7 @@
 //
 //    std::vector<std::string> words = { "aab", "abb", "aabb", "bba", "aaaaaaaaaaaaaaaaaaaaaaab" };
 //    for (const auto& word : words) {
-//        std::cout << "Cuvantul \"" << word << "\" este "
+//        std::cout << "cuvantul \"" << word << "\" este "
 //            << (dfa.checkWord(word) ? "acceptat" : "respins") << "\n";
 //    }
 //
@@ -53,12 +53,12 @@ int main()
     f >> regex;
     
 
-    std::cout << regex << "\n";
+    std::cout << regex << "\n\n";
 
-    std::cout << "polishNotation: " << polishPostfixForm(regex) << "\n";
+    std::cout << "polish notation: " << polishPostfix(regex) << "\n\n";
 
     DeterministicFiniteAutomaton dfa{};
-    dfa.createFromRegex(polishPostfixForm(regex));
+    dfa.createFromRegex(polishPostfix(regex));
 
     dfa.print();
 

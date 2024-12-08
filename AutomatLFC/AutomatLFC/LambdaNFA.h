@@ -6,29 +6,29 @@
 #include <unordered_set>
 #include <string_view>
 
-class LambdaNFA
+class NFA
 {
 public:
-    LambdaNFA();
+    NFA();
 
-    void constructFromRegex(std::string_view regex);
+    void constFromRegex(std::string_view regex);
 
-    DeterministicFiniteAutomaton convertToDFA() const;
+    DeterministicFiniteAutomaton toDFA() const;
     void print() const;
 
 private:
-    LambdaNFA constructCharNFA(State startSate, State finalState, char symbol);
-    LambdaNFA mergeNFA(const LambdaNFA& first, const LambdaNFA& second);
-    LambdaNFA alternateNFA(const LambdaNFA& first, const LambdaNFA& second);
-    LambdaNFA kleeneStarNFA(const LambdaNFA& automaton);
+    NFA constructNFA(State startSate, State finalState, char symbol);
+    NFA mergeNFA(const NFA& first, const NFA& second);
+    NFA alternateNFA(const NFA& first, const NFA& second);
+    NFA kleeneStarNFA(const NFA& automaton);
 
     static bool isOperator(char symbol);
-    std::unordered_set<State, State::Hash> getLambdaClosure(const std::unordered_set<State, State::Hash>& states) const;
+    std::unordered_set<State, State::Hash> getLambdaCls(const std::unordered_set<State, State::Hash>& states) const;
 private:
     static constexpr char lambda = '\0';
 private:
     std::map<StateSymbolPair, std::unordered_set<State, State::Hash>> m_transition;
-    std::unordered_map<State, State, State::Hash> m_equivalentStates;
+    std::unordered_map<State, State, State::Hash> m_eqStates;
     std::unordered_set<char> m_alphabet;
     StateSymbolPair m_startState;
     StateSymbolPair m_finalState;
