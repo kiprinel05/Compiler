@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\Output">
+      <UniqueIdentifier>{02a5dcec-d5a4-44e7-992e-5d5e9d23656d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Input">
+      <UniqueIdentifier>{9d702106-34d6-4fe8-a5b5-a8a0fa3af356}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AutomatLFC.cpp">
@@ -40,12 +46,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="input.txt" />
+    <Text Include="output_word.txt">
+      <Filter>Resource Files\Output</Filter>
+    </Text>
     <Text Include="data.txt">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Output</Filter>
+    </Text>
+    <Text Include="input.txt">
+      <Filter>Resource Files\Input</Filter>
     </Text>
     <Text Include="word.txt">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Input</Filter>
     </Text>
   </ItemGroup>
 </Project>

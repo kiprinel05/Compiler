@@ -141,6 +141,7 @@
   <ItemGroup>
     <Text Include="data.txt" />
     <Text Include="input.txt" />
+    <Text Include="output_word.txt" />
     <Text Include="word.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
