@@ -12,6 +12,17 @@ namespace MiniCompiler
         private int _position = 0;
         private int _lineNumber = 1;
 
+        private static readonly HashSet<string> Keywords = new HashSet<string>
+    {
+        "int", "float", "double", "string", "void", "if", "else", "for", "while", "return"
+    };
+
+        private static readonly HashSet<char> Delimiters = new HashSet<char> { '(', ')', '{', '}', ',', ';' };
+        private static readonly HashSet<string> Operators = new HashSet<string>
+    {
+        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=", "&&", "||", "++", "--"
+    };
+
         public Lexer(string source)
         {
             _source = source;
@@ -38,6 +49,15 @@ namespace MiniCompiler
                 {
                     tokens.Add(ReadNumber());
                 }
+                else if (Delimiters.Contains(current))
+                {
+                    tokens.Add(new Token(TokenType.Delimiter, current.ToString(), _lineNumber));
+                    _position++;
+                }
+                else if (IsOperatorStart(current))
+                {
+                    tokens.Add(ReadOperator());
+                }
                 else
                 {
                     tokens.Add(new Token(TokenType.Error, current.ToString(), _lineNumber));
@@ -55,7 +75,8 @@ namespace MiniCompiler
             while (_position < _source.Length && char.IsLetterOrDigit(_source[_position]))
                 _position++;
             string lexeme = _source.Substring(start, _position - start);
-            return new Token(TokenType.Identifier, lexeme, _lineNumber);
+            TokenType type = Keywords.Contains(lexeme) ? TokenType.Keyword : TokenType.Identifier;
+            return new Token(type, lexeme, _lineNumber);
         }
 
         private Token ReadNumber()
@@ -66,6 +87,30 @@ namespace MiniCompiler
             string lexeme = _source.Substring(start, _position - start);
             return new Token(TokenType.Number, lexeme, _lineNumber);
         }
+
+        private Token ReadOperator()
+        {
+            // Tratarea operatorilor care pot avea lungime de 2 caractere (ex: ==, !=, >=, ++, etc.)
+            int start = _position;
+            _position++;
+            if (_position < _source.Length)
+            {
+                string twoCharOperator = _source.Substring(start, 2);
+                if (Operators.Contains(twoCharOperator))
+                {
+                    _position++;
+                    return new Token(TokenType.Operator, twoCharOperator, _lineNumber);
+                }
+            }
+            string oneCharOperator = _source[start].ToString();
+            return new Token(TokenType.Operator, oneCharOperator, _lineNumber);
+        }
+
+        private bool IsOperatorStart(char c)
+        {
+            return "+-*/%=!<>&|".Contains(c);
+        }
     }
+
 
 }

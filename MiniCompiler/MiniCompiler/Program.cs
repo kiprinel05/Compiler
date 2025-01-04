@@ -7,33 +7,49 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Introduceți calea către fișierul sursă:");
-        string filePath = Console.ReadLine();
+        // Se va crea sau suprascrie fișierul debug.txt în directorul curent
+        string debugFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug.txt");
 
         try
         {
-            // Citirea conținutului fișierului
-            string sourceCode = File.ReadAllText(filePath);
-            Console.WriteLine("Codul sursă a fost încărcat cu succes!");
+            // Citirea fișierului sursă
+            string sourceFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "code.txt");
+            string sourceCode = File.ReadAllText(sourceFilePath);
 
-            // Inițializarea lexerului și tokenizarea
-            Lexer lexer = new Lexer(sourceCode);
-            List<Token> tokens = lexer.Tokenize();
-
-            // Afișarea tokenilor
-            Console.WriteLine("Tokenii identificați:");
-            foreach (var token in tokens)
+            using (StreamWriter debugWriter = new StreamWriter(debugFilePath, false))
             {
-                Console.WriteLine(token);
+                debugWriter.WriteLine("Starting lexical analysis...");
+
+                // Inițializarea lexerului și tokenizarea
+                Lexer lexer = new Lexer(sourceCode);
+                List<Token> tokens = lexer.Tokenize();
+
+                // Scrierea tokenilor în debug.txt
+                debugWriter.WriteLine("Tokens Identified:");
+                foreach (var token in tokens)
+                {
+                    debugWriter.WriteLine(token.ToString());
+                }
+
+                // Inițializarea parserului și analiza sintactică
+                Parser parser = new Parser(tokens);
+                debugWriter.WriteLine("Starting syntax analysis...");
+                parser.Parse(debugWriter);
+
+                // Inițializarea analizei semantice
+                SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(tokens);
+                int result = semanticAnalyzer.AnalyzeAndExecute(debugWriter);
+
+                // Afișarea rezultatului în consolă
+                Console.WriteLine($"Result: {result}");
             }
 
-            // Inițializarea parserului și analiza sintactică
-            Parser parser = new Parser(tokens);
-            parser.Parse();
+            // Mesaj de finalizare
+            Console.WriteLine("Compilation completed successfully. Check 'debug.txt' for details.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Eroare la citirea fișierului: {ex.Message}");
+            Console.WriteLine($"An error occurred: {ex.Message}");
         }
     }
 }
