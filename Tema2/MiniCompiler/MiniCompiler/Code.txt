@@ -1,0 +1,15 @@
+﻿int x = 10;
+float y = 3.14;
+string name = "John";
+
+if (x > 5) {
+    y = y * 2;  // corect, operatorul de atribuire este folosit
+} else {
+    x = x + 1;
+}
+
+while (x < 20) {
+    x = x + 1;
+}
+
+return x;  // valid, returnează valoarea lui x
