@@ -1,19 +1,14 @@
 grammar MiniLang;
 
-// Programul constă dintr-o listă de funcții
 program: function* EOF;
 
-// Definirea unei funcții
 function: type IDENTIFIER '(' parameterList? ')' block;
 
-// Parametri funcție
 parameterList: parameter (',' parameter)*;
 parameter: type IDENTIFIER;
 
-// Blocuri de cod
 block: '{' statement* '}';
 
-// Declarații și expresii
 statement:
 	varDeclaration
 	| assignment
@@ -23,13 +18,10 @@ statement:
 	| returnStatement
 	| expression ';';
 
-// Declarații de variabile
 varDeclaration: type IDENTIFIER ( '=' expression)? ';';
 
-// Atribuire
 assignment: IDENTIFIER '=' expression ';';
 
-// Structuri de control
 ifStatement: 'if' '(' expression ')' block ('else' block)?;
 
 whileStatement: 'while' '(' expression ')' block;
@@ -39,7 +31,6 @@ forStatement:
 
 returnStatement: 'return' expression? ';';
 
-// Expresii
 expression:
 	expression ('||' expression)									# LogicalOr
 	| expression ('&&' expression)									# LogicalAnd
@@ -53,15 +44,12 @@ expression:
 	| NUMBER														# Number
 	| STRING														# String;
 
-// Tipuri
 type: 'int' | 'float' | 'double' | 'string' | 'void';
 
-// Token-uri pentru identificatori, literali și altele
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 NUMBER: [0-9]+ ('.' [0-9]+)?;
 STRING: '"' (~["\\] | '\\' .)* '"';
 
-// Operatori și delimitatori
 ADD: '+';
 SUB: '-';
 MUL: '*';
@@ -94,7 +82,6 @@ RBRACE: '}';
 COMMA: ',';
 SEMI: ';';
 
-// Spații albe și comentarii
 WS: [ \t\r\n]+ -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
