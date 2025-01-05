@@ -1,7 +1,17 @@
 grammar MiniLang;
 
-// Programul începe de la regula `program`
-program: statement* EOF;
+// Programul constă dintr-o listă de funcții
+program: function* EOF;
+
+// Definirea unei funcții
+function: type IDENTIFIER '(' parameterList? ')' block;
+
+// Parametri funcție
+parameterList: parameter (',' parameter)*;
+parameter: type IDENTIFIER;
+
+// Blocuri de cod
+block: '{' statement* '}';
 
 // Declarații și expresii
 statement:
@@ -13,24 +23,19 @@ statement:
 	| returnStatement
 	| expression ';';
 
-// Declarații
+// Declarații de variabile
 varDeclaration: type IDENTIFIER ( '=' expression)? ';';
 
 // Atribuire
 assignment: IDENTIFIER '=' expression ';';
 
 // Structuri de control
-ifStatement:
-	'if' '(' expression ')' '{' statement* '}' (
-		'else' '{' statement* '}'
-	)?;
+ifStatement: 'if' '(' expression ')' block ('else' block)?;
 
-whileStatement: 'while' '(' expression ')' '{' statement* '}';
+whileStatement: 'while' '(' expression ')' block;
 
 forStatement:
-	'for' '(' (varDeclaration | assignment)? ';' expression? ';' (
-		assignment
-	)? ')' '{' statement* '}';
+	'for' '(' (varDeclaration | assignment)? ';' expression? ';' assignment? ')' block;
 
 returnStatement: 'return' expression? ';';
 
@@ -43,6 +48,7 @@ expression:
 	| expression ('*' | '/' | '%') expression						# Multiplicative
 	| ('!' | '++' | '--') expression								# Unary
 	| '(' expression ')'											# Parens
+	| IDENTIFIER '(' (expression (',' expression)*)? ')'			# FunctionCall
 	| IDENTIFIER													# Identifier
 	| NUMBER														# Number
 	| STRING														# String;

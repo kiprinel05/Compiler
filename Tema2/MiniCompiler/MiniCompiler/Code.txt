@@ -1,15 +1,28 @@
-﻿int x = 10;
-float y = 3.14;
-string name = "John";
-
-if (x > 5) {
-    y = y * 2;  // corect, operatorul de atribuire este folosit
-} else {
-    x = x + 1;
+﻿int factorial(int n) {
+    int result = 1;
+    while (n > 1) {
+        result = result * n;
+        n = n - 1;
+    }
+    return result;
 }
 
-while (x < 20) {
-    x = x + 1;
+float calculateAverage(int a, int b, int c) {
+    int sum = a + b + c;
+    return sum / 3.0;
 }
 
-return x;  // valid, returnează valoarea lui x
+int main() { 
+    int x = 5;
+    int fact = factorial(x); // Calculăm factorialul lui x
+
+    float avg = calculateAverage(10, 20, 30); // Calculăm media a trei numere
+
+    if (fact > 100) {
+        print("Factorialul este mare.");
+    } else {
+        print("Factorialul este mic.");
+    }
+    /* da da da*/
+    return 0;
+}
