@@ -14,9 +14,9 @@ float calculateAverage(int a, int b, int c) {
 
 int main() { 
     int x = 5;
-    int fact = factorial(x); // Calculăm factorialul lui x
+    int fact = factorial(x); // Calculam factorialul lui x
 
-    float avg = calculateAverage(10, 20, 30); // Calculăm media a trei numere
+    float avg = calculateAverage(10, 20, 30); // Calculam media a trei numere
 
     if (fact > 100) {
         print("Factorialul este mare.");

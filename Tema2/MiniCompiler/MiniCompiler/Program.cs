@@ -1,23 +1,6 @@
 ﻿using System;
 using System.IO;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
-
-public class ErrorListener : BaseErrorListener
-{
-    public bool HasErrors { get; private set; } = false;
-
-    public override void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
-    {
-        HasErrors = true; 
-        Console.WriteLine($"[Error] Line {line}, Position {charPositionInLine}: {msg}");
-
-        if (e != null)
-        {
-            Console.WriteLine($"[Details] {e.Message}");
-        }
-    }
-}
 
 class Program
 {
@@ -41,12 +24,33 @@ class Program
 
             if (!errorListener.HasErrors)
             {
-                Console.WriteLine("Programul a fost analizat cu succes!");
+                Console.WriteLine("Analiza lexicala si sintactica reusita");
+
+                var semanticAnalyzer = new SemanticAnalyzer();
+                semanticAnalyzer.Visit(tree);
+
+                if (semanticAnalyzer.Errors.Count > 0)
+                {
+                    Console.WriteLine("Erori semantice detectate:");
+                    foreach (var error in semanticAnalyzer.Errors)
+                    {
+                        Console.WriteLine(error);
+                    }
+                    File.WriteAllLines("semantic_errors.txt", semanticAnalyzer.Errors);
+                }
+                else
+                {
+                    Console.WriteLine("Analiza semantica reusita");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Erori lexicale/sintactice detectate");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"A apărut o eroare: {ex.Message}");
+            Console.WriteLine($"[Critical Error]: {ex.Message}");
         }
     }
 }
